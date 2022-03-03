@@ -1,16 +1,10 @@
 "use strict";
 
-const restaurantController = require("./controller/restaurantController");
 const pringleController = require("./controller/pringleController");
+const restaurantController = require("./controller/restaurantController");
 
 module.exports = function (app) {
-  app.route("/api/digitalmenucart").post(restaurantController.createCard);
-  app
-    .route("api/digitalmenucartitem")
-    .post(restaurantController.createCartItems);
-  app
-    .route(`/api/DigitalMenuCartItem`)
-    .put(restaurantController.updateCartItemQuantity);
-  app.route(`/api/DigitalMenuCartItem`).get(restaurantController.getCart);
-  app.route(`/api/getAllProduct`).get(pringleController.getAllProduct);
+  app.route("/getAllProduct").get(pringleController.getAllProduct),
+  app.route("/getProduct").get(pringleController.getProduct);
+  app.route("/getAllRecipes").get(restaurantController.mockGetAllRecipes)
 };
