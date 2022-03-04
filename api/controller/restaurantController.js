@@ -80,4 +80,39 @@ const resturantController = {
       };
     }
   },
+
+  searchChildData: async (req, res) => {
+    // if true then req.query is empty
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.type === "" ||
+      req.query.keyword === "" ||
+      req.query.resid === ""
+    ) {
+      //return boolean
+      return res.status(400).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+    //  console.log(req.query.type );
+    if (req.query.type === "popular") {
+      const data = await fs.readFileSync("./config/prioritizeArr.json", "utf8");
+      console.log(data);
+      res.send("popular data" + data);
+    }
+    obj = JSON.parse(data);
+    let arrayData = [];
+    obj.map((item, index) => {
+      //arrayData[index] = new ObjectId(item.recipeId);
+      arrayData[index] = item.recipeId;
+      if (obj.length === index + 1) {
+        return arrayData;
+      }
+    });
+    console.log(arrayData);
+  },
 };
+
+module.exports = resturantController;
