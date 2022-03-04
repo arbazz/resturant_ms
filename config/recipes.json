@@ -1,0 +1,97 @@
+{
+    "_id": "60d8176102eeabab9cee4b8e",
+    "dishName": "indonesian soto ayam",
+    "altDishName": "lick soto",
+    "parentCuisine": "60a22a89641c23fc3df79d13",
+    "childCuisine": "60a22a89641c23fc3df79d13",
+    "serve_size": 4,
+    "serve_measuring_unit": "servings",
+    "type_of_dish": "soup",
+    "meal_course": "soup",
+    "ingredients": [
+        {
+            "oldQuantity": 0.5,
+            "oldUnit": "whole",
+            "quantity": "",
+            "quantity_per_serve": null,
+            "ingredientId": "607e8cc8a57aa56e2a06b6af",
+            "newUnit": "g"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "stalk",
+            "quantity": null,
+            "quantity_per_serve": null,
+            "ingredientId": "607eb015a57aa56e2a06c828",
+            "newUnit": "g"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "can",
+            "quantity": null,
+            "quantity_per_serve": null,
+            "ingredientId": "607eb5f8a57aa56e2a06dfae",
+            "newUnit": "ml"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "can",
+            "quantity": null,
+            "quantity_per_serve": null,
+            "ingredientId": "609bae8eb1651800e8cb5d0f",
+            "newUnit": "ml"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "cup",
+            "quantity": null,
+            "quantity_per_serve": null,
+            "ingredientId": "60a3c6ca2db27c601795a616",
+            "newUnit": "ml"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "tsp",
+            "quantity": 1.666,
+            "quantity_per_serve": 0.4165,
+            "ingredientId": "607ed9acbbbfd06b94fab45e",
+            "newUnit": "g"
+        },
+        {
+            "oldQuantity": 1,
+            "oldUnit": "tsp",
+            "quantity": 2,
+            "quantity_per_serve": 0.5,
+            "ingredientId": "607ed9acbbbfd06b94fab45f",
+            "newUnit": "g"
+        },
+        {
+            "oldQuantity": 4,
+            "oldUnit": "whole",
+            "quantity": 100,
+            "quantity_per_serve": 25,
+            "ingredientId": "607eb016a57aa56e2a06cc03",
+            "newUnit": "g"
+        }
+    ],
+    "childAllergies": [
+        "60d5a71294696672e25d8520",
+        "60d5a71294696672e25d8675",
+        "60d5a71294696672e25d84e6"
+    ],
+    "parentAllergies": [
+        "60d5a44d4afa0f198569cf94",
+        "60d5a4d74afa0f198569cf97",
+        "60d5a4344afa0f198569cf92"
+    ],
+    "preparation": "<h3><b>for boiling noodles </b></h3><li><p>water (for boiling)</p><p>1 tsp salt</p><p>3 tsp oil</p><p>3 pack noodles</p></li><h3><b>for sauce:</b></h3><li><p>1 tsp corn flour</p><p>1 tsp chilli powder</p><p>¼ tsp cumin powder</p><p>¼ tsp coriander powder</p><p>1 tsp sugar</p><p>¾ tsp salt</p><p>1 tsp sugar</p><p>2 tbsp soy sauce</p><p>2 tbsp vinegar</p><p>2 tsp oil</p><p>¼ tsp pepper powder</p></li>",
+"cooking": "<h3><b>what is the best way to cook noodles:</b></h3><li><p>firstly, in a large vessel take water.</p><p>add 1 tsp salt,3tsp oil. get the water to a rolling boil.</p><p>now add 3 pack noodles and dip completely.</p><p>boil for 3 minutes, or refer to package instructions to know the cooking time.</p><p>separate the noodles and drain off.</p><p>rinse with cold water to stop cooking and turning noodles mushy.</p></li><h3><b>what is chow mein sauce made of:</b></h3><li><p>firstly, in a small bowl take 1 tsp corn flour, 1 tsp chilli powder, ¼ tsp cumin powder and ¼ tsp coriander powder.</p> <p>also add 1 tsp sugar, ¾ tsp salt, 2 tbsp soy sauce and 2 tbsp vinegar.</p><p>further, add 2 tsp oil and ¼ tsp pepper powder. traditionally, sesame oil and oyster sauce is also added.</p><p>mix well making sure there are no lumps, chowmein sauce re.</p></li>",
+"directions": "221-B, Baker Street, London",
+    "slug": "60a22a89641c23fc3df79d13-indonesian-soto-ayam",
+    "isKosher": true,
+    "isHalal": true,
+    "mainCategory": "non-veg",
+    "subCategory": "kosher",
+    "imageName": "dish_94",
+    "imageUrl": "https://d2m3j0c0mgkzm7.cloudfront.net/DISH_94.jpg"
+}

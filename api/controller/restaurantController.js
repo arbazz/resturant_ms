@@ -1,42 +1,118 @@
-"use strict";
-const restaurantService = require("../../service/restaurant");
+const fs = require("fs");
 
-var restaurantController = {
-  getCart: async (req, res) => {
+const resturantController = {
+  mockGetAllRecipes: async (req, res) => {
     try {
-      const token = req.get("Token");
-      // if (!token) {
-      //   return res.status(200).json({
-      //     error: "Token is required",
-      //   });
-      // }
-      const response = await restaurantService.getDigitalMenu(
-        "0a799973-206a-4d1b-bf1f-1c3b06f845fd"
+      const file = await fs.readFileSync(
+        "./controller/onboarding/recipes.json",
+        "utf8"
       );
-      res.json({ response });
+      let obj = JSON.parse(data);
+      let arr = [];
+      arr = arr.push(obj);
+      const returnObj = {
+        preparation: obj.preparation,
+        cooking: obj.cooking,
+      };
+      return res.status(200).json({
+        status: true,
+        returnObj,
+      });
     } catch (err) {
-      console.log(err.message);
-      res.json(err.message);
+      new Error(err);
+      return res.status(500).json({
+        status: false,
+        error: err.message,
+      });
     }
   },
-  createCard: async (req, res) => {
-    try {
-      const token = req.get("Token");
-      const response = await restaurantService.createCart(token);
-      res.json({ response });
-    } catch (error) {
-      console.log(error);
-      res.json(error.message);
+  searchData: async (req, res) => {
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.type === "" ||
+      req.query.keyword === ""
+    ) {
+      //return boolean
+      return res.status(400).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+    let query = {};
+    if (req.query.type === "restaurant") {
+      (query = {
+        $or: [
+          {
+            restaurantName: {
+              $regex: req.query.keyword,
+              $options: "si",
+            },
+          },
+          {
+            dishes: {
+              $elemMatch: {
+                resDishName: {
+                  $regex: req.query.keyword,
+                  $options: "si",
+                },
+              },
+            },
+          },
+        ],
+      }),
+        {
+          restaurantName: 1,
+          restaurantID: 1,
+          "image.imageUrl": 1,
+          _id: 1,
+        };
+    } else if (req.query.type === "dish") {
+      query = {
+        dishName: {
+          $elemMatch: {
+            name: {
+              $regex: req.query.keyword,
+              $options: "si",
+            },
+          },
+        },
+      };
     }
   },
-  createCartItems: async (req, res) => {
-    try {
-    } catch (error) {}
-  },
-  updateCartItemQuantity: async (req, res) => {
-    try {
-    } catch (error) {}
+
+  searchChildData: async (req, res) => {
+    // if true then req.query is empty
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.type === "" ||
+      req.query.keyword === "" ||
+      req.query.resid === ""
+    ) {
+      //return boolean
+      return res.status(400).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+    //  console.log(req.query.type );
+    if (req.query.type === "popular") {
+      const data = await fs.readFileSync("./config/prioritizeArr.json", "utf8");
+      console.log(data);
+      res.send("popular data" + data);
+    }
+    obj = JSON.parse(data);
+    let arrayData = [];
+    obj.map((item, index) => {
+      //arrayData[index] = new ObjectId(item.recipeId);
+      arrayData[index] = item.recipeId;
+      if (obj.length === index + 1) {
+        return arrayData;
+      }
+    });
+    console.log(arrayData);
   },
 };
 
-module.exports = restaurantController;
+module.exports = resturantController;
