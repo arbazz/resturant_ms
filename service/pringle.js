@@ -21,22 +21,22 @@ var pringleService = {
     });
   },
 
-  get: async function (token) {
-    return new Promise(async (res, rej) => {
-      try {
-        const response = await axios({
-          url: CONSTANT.rest_url,
-          method: "get",
-          headers: {
-            Token: token
-          },
-        });
-        res(response?.data);
-      } catch (error) {
-        rej(error);
-      }
-    });
-  },
+  get: async (token)=>{
+  return new Promise(async(res,rej)=>{
+try{
+  const response = await axios({
+    url: CONSTANT.rest_url,
+    method: "get",
+    headers: {
+      Token: token,
+    },
+  });
+  res(response?.data);
+}catch(error){
+  rej(error);
+              }
+  });
+},
 };
 
 module.exports = pringleService;
