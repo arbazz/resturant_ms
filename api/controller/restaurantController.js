@@ -40,8 +40,9 @@ const resturantController = {
       });
     }
     let query = {};
+    let query2 = {};
     if (req.query.type === "restaurant") {
-      (query = {
+      query = {
         $or: [
           {
             restaurantName: {
@@ -60,13 +61,13 @@ const resturantController = {
             },
           },
         ],
-      }),
-        {
-          restaurantName: 1,
-          restaurantID: 1,
-          "image.imageUrl": 1,
-          _id: 1,
-        };
+      };
+      query2 = {
+        restaurantName: 1,
+        restaurantID: 1,
+        "image.imageUrl": 1,
+        _id: 1,
+      };
     } else if (req.query.type === "dish") {
       query = {
         dishName: {
@@ -78,6 +79,28 @@ const resturantController = {
           },
         },
       };
+      query2 = {
+        "dishName.$": 1,
+        image: 1,
+        _id: 1
+      }
     }
+    try {
+      const response = await Recipes.find({ query, query2 });
+      return res.status(200).json({
+        status: true,
+        response,
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
+        err: err,
+      });
+    }
+
   },
 };
+
+module.exports = resturantController;
