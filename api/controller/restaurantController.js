@@ -134,7 +134,7 @@ const resturantController = {
         msg: "Bad Input",
       });
     }
-    let findData={};
+    let findData = {};
     if (req.query.type === "popular") {
       let file = await fs.readFileSync(
         "./config/prioritizeArr.json",
@@ -221,178 +221,174 @@ const resturantController = {
             },
           };
         }
-      }} else if (
-        req.query.mainCategory != "all" &&
-        req.query.subCategory == "all"
-      ) {
-        if (req.query.keyword == "all") {
-          findData = {
-            "_id": ObjectId(req.query.resid),
+      }
+    } else if (
+      req.query.mainCategory != "all" &&
+      req.query.subCategory == "all"
+    ) {
+      if (req.query.keyword == "all") {
+        findData = {
+          "_id": ObjectId(req.query.resid),
+          "restaurant_menu.meal_courses": {
+            $regex: req.query.mainCategory,
+            $options: "si",
+          },
+        };
+      } else {
+        findData = {
+          $and: [{
+            "_id": ObjectId(req.query.resid)
+          },
+          {
             "restaurant_menu.meal_courses": {
               $regex: req.query.mainCategory,
               $options: "si",
             },
-          };
-        } else {
-          findData = {
-            $and: [{
-              "_id": ObjectId(req.query.resid)
-            },
-            {
-              "restaurant_menu.meal_courses": {
-                $regex: req.query.mainCategory,
-                $options: "si",
-              },
-            },
-            {
-              "restaurant_menu.dish_name": {
-                $regex: req.query.keyword,
-                $options: "si",
-              },
-            },
-            ],
-          };
-        }
-      } else if (
-        req.query.mainCategory != "all" &&
-        req.query.subCategory != "all"
-      ) {
-        // check when click courses and click parent category Breakfast, lunch, bunch dinner and click sub category like drinks staters etc
-        if (req.query.keyword == "all") {
-          findData = {
-            $and: [{
-              "restaurant_menu.meal_courses": {
-                $regex: req.query.mainCategory,
-                $options: "si",
-              },
-            },
-            {
-              "restaurant_menu.typeOfMenu": {
-                $regex: req.query.subCategory,
-                $options: "si",
-              },
-            },
-            ],
-          };
-        } else {
-          findData = {
-            $and: [{
-              "restaurant_menu.meal_courses": {
-                $regex: req.query.mainCategory,
-                $options: "si",
-              },
-            },
-            {
-              "restaurant_menu.typeOfMenu": {
-                $regex: req.query.subCategory,
-                $options: "si",
-              },
-            },
-            {
-              "restaurant_menu.dish_name": {
-                $regex: req.query.keyword,
-                $options: "si",
-              },
-            },
-            ],
-          };
-        }
-      } // else end
-
-      if (req.query.keyword == "all") {
-        keyWordSerch = {};
-      } else {
-        keyWordSerch = {
-          restaurant_menu: {
-            $elemMatch: {
-              dish_name: {
-                $regex: req.query.keyword,
-                $options: "si",
-              },
+          },
+          {
+            "restaurant_menu.dish_name": {
+              $regex: req.query.keyword,
+              $options: "si",
             },
           },
+          ],
         };
       }
-       let data1 =  await Restaurantdata.aggregate(
-          [{
-                  $unwind: "$restaurant_menu"
-              },
-              {
-                  $match: findData
-              },
-              {
-                  $project: {
-                      _id: 1,
-                      //restaurantTags: 1,
-                      "image": 1,
-                      restaurantName: 1,
-                      //cuisineServed: 1,
-                      pricing_details: 1,
-                      contact_details: 1,
-                      "restaurant_menu.meal_courses": 1,
-                      "restaurant_menu.typeOfMenu": 1,
-                      "restaurant_menu.dish_name": 1,
-                      //"restaurant_menu.resDishUrl": 1,
-                      "restaurant_menu.price": 1,
-                      //"restaurant_menu.dishSubstitute": 1,
-                      //"restaurant_menu.dishOptions": 1,
-                      //"restaurant_menu.dishSize": 1,
-                      //"restaurant_menu.dishAddOn": 1,
-                      "restaurant_menu.image": 1,
-                  },
-              },
-          ]);
-          let promiseResult = data1.map((d) => {
-                      const returnObj = {
-                          restaurantId: resultUsersData[d]._id,
-                          restaurantImg: resultUsersData[d].image,
-                          restaurantName: resultUsersData[d].restaurantName,
-                          //restaurantCuisine: resultUsersData[0].cuisineServed,
-                          restaurantPricing: resultUsersData[d].pricing_details,
-                          restaurantAddress: resultUsersData[d].contact_details,
-                          //restaurantTags: resultUsersData[0].restaurantTags,
-                      };
-                      
-                      let dishes = data1
-                          .filter(
-                              (data) => req.query.resid.toString() === data._id.toString()
-                          )
-                          .map((d) => d.restaurant_menu);
-                      let removeDup = dishes.reduce((unique, o) => {
-                          if (
-                              !unique.some(
-                                  (obj) =>
-                                  obj.dish_name === o.dish_name &&
-                                  obj.price === o.price
-                              )
-                          ) {
-                              unique.push(o);
-                          }
-                          return unique;
-                      }, []);
+    } else if (
+      req.query.mainCategory != "all" &&
+      req.query.subCategory != "all"
+    ) {
+      // check when click courses and click parent category Breakfast, lunch, bunch dinner and click sub category like drinks staters etc
+      if (req.query.keyword == "all") {
+        findData = {
+          $and: [{
+            "restaurant_menu.meal_courses": {
+              $regex: req.query.mainCategory,
+              $options: "si",
+            },
+          },
+          {
+            "restaurant_menu.typeOfMenu": {
+              $regex: req.query.subCategory,
+              $options: "si",
+            },
+          },
+          ],
+        };
+      } else {
+        findData = {
+          $and: [{
+            "restaurant_menu.meal_courses": {
+              $regex: req.query.mainCategory,
+              $options: "si",
+            },
+          },
+          {
+            "restaurant_menu.typeOfMenu": {
+              $regex: req.query.subCategory,
+              $options: "si",
+            },
+          },
+          {
+            "restaurant_menu.dish_name": {
+              $regex: req.query.keyword,
+              $options: "si",
+            },
+          },
+          ],
+        };
+      }
+    } // else end
 
-                       return ({
-                          ...returnObj,
-                          dishes: removeDup
-                      });
+    if (req.query.keyword == "all") {
+      keyWordSerch = {};
+    } else {
+      keyWordSerch = {
+        restaurant_menu: {
+          $elemMatch: {
+            dish_name: {
+              $regex: req.query.keyword,
+              $options: "si",
+            },
+          },
+        },
+      };
+    }
+    await Restaurantdata.aggregate(
+      [{
+        $unwind: "$restaurant_menu"
+      },
+      {
+        $match: findData
+      },
+      {
+        $project: {
+          _id: 1,
+          //restaurantTags: 1,
+          "image": 1,
+          restaurantName: 1,
+          //cuisineServed: 1,
+          pricing_details: 1,
+          contact_details: 1,
+          "restaurant_menu.meal_courses": 1,
+          "restaurant_menu.typeOfMenu": 1,
+          "restaurant_menu.dish_name": 1,
+          //"restaurant_menu.resDishUrl": 1,
+          "restaurant_menu.price": 1,
+          //"restaurant_menu.dishSubstitute": 1,
+          //"restaurant_menu.dishOptions": 1,
+          //"restaurant_menu.dishSize": 1,
+          //"restaurant_menu.dishAddOn": 1,
+          "restaurant_menu.image": 1,
+        },
+      },
+      ]).then((result) => {
+        result.map((d) => {
+          const returnObj = {
+            restaurantId: resultUsersData[d]._id,
+            restaurantImg: resultUsersData[d].image,
+            restaurantName: resultUsersData[d].restaurantName,
+            //restaurantCuisine: resultUsersData[0].cuisineServed,
+            restaurantPricing: resultUsersData[d].pricing_details,
+            restaurantAddress: resultUsersData[d].contact_details,
+            //restaurantTags: resultUsersData[0].restaurantTags,
+          };
 
-              })
-              Promise.all(promiseResult)
-              .then((data) => {
-                  return res.status(200).json({
-                      status: true,
-                      data,
-                  });
-              })
-              .catch(() => {
-                  return res.status(500).json({
-                      status: false,
-                      msg: "Something went wrong!!!",
-                  });
-              });
+          let dishes = result
+            .filter(
+              (data) => req.query.resid.toString() === data._id.toString()
+            )
+            .map((d) => d.restaurant_menu);
+          let removeDup = dishes.reduce((unique, o) => {
+            if (
+              !unique.some(
+                (obj) =>
+                  obj.dish_name === o.dish_name &&
+                  obj.price === o.price
+              )
+            ) {
+              unique.push(o);
+            }
+            return unique;
+          }, []);
 
-    },
+          return {
+            ...returnObj,
+            dishes: removeDup,
+          }
+      })
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    })
+        .catch(() => {
+          return res.status(500).json({
+            status: false,
+            msg: "Something Went Wrong!!!",
+          });
+        });
+      },                     
+  };
 
-};
-
-module.exports = resturantController;
+  module.exports = resturantController;

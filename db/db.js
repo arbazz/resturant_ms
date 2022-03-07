@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // ------------------------------------------- mongodb connection code s-------------------------------------------
 // let dbURI = "";  // cloud URI
-let dbURI = "mongodb://localhost/matirxRestaurantDB";
+let dbURI = "mongodb+srv://dbPikky:dbPikky@pikkydb.v4uzk.mongodb.net/test";
 mongoose.connect(dbURI);
 
 // ------------------------------------------- mongodb connected disconnected events-------------------------------------------
