@@ -132,7 +132,6 @@ const resturantController = {
       }
       //  console.log(req.query.type );
       if (req.query.type === "popular") {
-      
         const data = await fs.readFileSync(
           "./config/prioritizeArr.json",
           "utf8"
@@ -212,6 +211,7 @@ const resturantController = {
             },
           },
         ]);
+        let dataObj;
         if (resultUsersData) {
           if (resultUsersData.length > 0) {
             const returnObj = {
@@ -240,8 +240,17 @@ const resturantController = {
               }
               return unique;
             }, []);
+            dataObj = {
+              ...returnObj,
+              dishes: removeDup,
+            };
+          } else {
+            dataObj = {
+              data: null,
+            };
           }
         }
+
         if (data.data === null) {
           res.status(200).json({
             status: true,
@@ -253,8 +262,199 @@ const resturantController = {
             data,
           });
         }
+      } else if (req.query.type === "sensory") {
+        let findData;
+        // check when click courses
+        if (req.query.mainCategory == "all" && req.query.subCategory == "all") {
+          if (req.query.keyword == "all") {
+            findData = {
+              _id: ObjectId(req.query.resid),
+            };
+          } else {
+            findData = {
+              _id: ObjectId(req.query.resid),
+              "restaurant_menu.dish_name": {
+                $regex: req.query.keyword,
+                $options: "si",
+              },
+            };
+          }
+        } else if (
+          req.query.mainCategory != "all" &&
+          req.query.subCategory == "all"
+        ) {
+          if (req.query.keyword == "all") {
+            findData = {
+              _id: ObjectId(req.query.resid),
+              "restaurant_menu.meal_courses": {
+                $regex: req.query.mainCategory,
+                $options: "si",
+              },
+            };
+          } else {
+            findData = {
+              $and: [
+                {
+                  _id: ObjectId(req.query.resid),
+                },
+                {
+                  "restaurant_menu.meal_courses": {
+                    $regex: req.query.mainCategory,
+                    $options: "si",
+                  },
+                },
+                {
+                  "restaurant_menu.dish_name": {
+                    $regex: req.query.keyword,
+                    $options: "si",
+                  },
+                },
+              ],
+            };
+          }
+        } else if (
+          req.query.mainCategory != "all" &&
+          req.query.subCategory != "all"
+        ) {
+          // check when click courses and click parent category Breakfast, lunch, bunch dinner and click sub category like drinks staters etc
+          if (req.query.keyword == "all") {
+            findData = {
+              $and: [
+                {
+                  "restaurant_menu.meal_courses": {
+                    $regex: req.query.mainCategory,
+                    $options: "si",
+                  },
+                },
+                {
+                  "restaurant_menu.typeOfMenu": {
+                    $regex: req.query.subCategory,
+                    $options: "si",
+                  },
+                },
+              ],
+            };
+          } else {
+            findData = {
+              $and: [
+                {
+                  "restaurant_menu.meal_courses": {
+                    $regex: req.query.mainCategory,
+                    $options: "si",
+                  },
+                },
+                {
+                  "restaurant_menu.typeOfMenu": {
+                    $regex: req.query.subCategory,
+                    $options: "si",
+                  },
+                },
+                {
+                  "restaurant_menu.dish_name": {
+                    $regex: req.query.keyword,
+                    $options: "si",
+                  },
+                },
+              ],
+            };
+          }
+        } // else end
+
+        if (req.query.keyword == "all") {
+          keyWordSerch = {};
+        } else {
+          keyWordSerch = {
+            restaurant_menu: {
+              $elemMatch: {
+                dish_name: {
+                  $regex: req.query.keyword,
+                  $options: "si",
+                },
+              },
+            },
+          };
+        }
+        let resultUsersData = await Restaurantdata.aggregate([
+          {
+            $unwind: "$restaurant_menu",
+          },
+          {
+            $match: findData,
+          },
+          {
+            $project: {
+              _id: 1,
+              //restaurantTags: 1,
+              image: 1,
+              restaurantName: 1,
+              //cuisineServed: 1,
+              pricing_details: 1,
+              contact_details: 1,
+              "restaurant_menu.meal_courses": 1,
+              "restaurant_menu.typeOfMenu": 1,
+              "restaurant_menu.dish_name": 1,
+              //"restaurant_menu.resDishUrl": 1,
+              "restaurant_menu.price": 1,
+              //"restaurant_menu.dishSubstitute": 1,
+              //"restaurant_menu.dishOptions": 1,
+              //"restaurant_menu.dishSize": 1,
+              //"restaurant_menu.dishAddOn": 1,
+              "restaurant_menu.image": 1,
+            },
+          },
+        ]);
+        let dataObj;
+        if (resultUsersData) {
+          if (resultUsersData.length > 0) {
+            const returnObj = {
+              restaurantId: resultUsersData[0]._id,
+              restaurantImg: resultUsersData[0].image,
+              restaurantName: resultUsersData[0].restaurantName,
+              //restaurantCuisine: resultUsersData[0].cuisineServed,
+              restaurantPricing: resultUsersData[0].pricing_details,
+              restaurantAddress: resultUsersData[0].contact_details,
+              //restaurantTags: resultUsersData[0].restaurantTags,
+            };
+
+            let dishes = resultUsersData
+              .filter(
+                (data) => req.query.resid.toString() === data._id.toString()
+              )
+              .map((d) => d.restaurant_menu);
+            let removeDup = dishes.reduce((unique, o) => {
+              if (
+                !unique.some(
+                  (obj) =>
+                    obj.dish_name === o.dish_name && obj.price === o.price
+                )
+              ) {
+                unique.push(o);
+              }
+              return unique;
+            }, []);
+            dataObj = {
+              ...returnObj,
+              dishes: removeDup,
+            };
+          } else {
+            dataObj = {
+              data: null,
+            };
+          }
+        }
+
+        if (dataObj === null) {
+          res.status(200).json({
+            status: true,
+            data: null,
+          });
+        } else {
+          res.status(200).json({
+            status: true,
+            data : dataObj,
+          });
+        }
       }
-      
     } catch (error) {
       return res.status(500).send({
         message: "Some Thing went wrong",
