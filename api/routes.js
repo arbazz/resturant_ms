@@ -9,5 +9,6 @@ module.exports = function (app) {
   app.route("/mockGetAllRecipes").get(restaurantController.mockGetAllRecipes);
   app.route("/searchChildData").get(restaurantController.searchChildData),
   app.route("/searchData").get(restaurantController.searchData);
+  app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags);
  
 };
