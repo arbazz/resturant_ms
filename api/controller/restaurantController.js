@@ -634,6 +634,62 @@ const resturantController = {
       });
     }
   },
+  getMealNameAndMealCourse: async (req, res) => {
+    try {
+      const { resid } = req.query;
+      const result = await Restaurantdata.findById(
+        {
+          _id: ObjectId(resid),
+        },
+        {
+          "dishes.mealName": 1,
+          "dishes.subCourse": 1,
+        }
+      );
+      function removeDuplicatesBy(keyFn, array) {
+        let mySet = new Set();
+        return array.filter(function (x) {
+          let key = keyFn(x),
+            isNew = !mySet.has(key);
+          if (isNew) mySet.add(key);
+          return isNew;
+        });
+      }
+
+      let data = result.dishes.reduce((unique, o) => {
+        if (
+          !unique.some(
+            (obj) =>
+              obj.mealName === o.mealName && obj.subCourse === o.subCourse
+          )
+        ) {
+          unique.push(o);
+        }
+        return unique;
+      }, []);
+
+      // let mealName = [];
+      // let subCourse = [];
+
+      // removeDuplicatesBy((x) => x.mealName, removeDup).map((d) => {
+      // 	mealName.push(d.mealName);
+      // });
+
+      // removeDuplicatesBy((x) => x.subCourse, removeDup).map((d) => {
+      // 	subCourse.push(d.subCourse);
+      // });
+      // let data = { mealName: mealName, subCourse: subCourse };
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
+      });
+    }
+  },
 };
 
 module.exports = resturantController;

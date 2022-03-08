@@ -13,4 +13,7 @@ module.exports = function (app) {
     .route("/starLightForRestaurants")
     .get(restaurantController.starLightForRestaurants);
   app.route("/getAllRestaurant").get(restaurantController.getAllRestaurant);
+  app
+    .route("/getMealNameAndMealCourse")
+    .get(restaurantController.getMealNameAndMealCourse);
 };
