@@ -464,6 +464,7 @@ const resturantController = {
   },
   starLightForRestaurants: async (req, res) => {
     // if true then req.query is empty
+
     if (
       Object.values(req.query).every((page) => page === "") ||
       typeof req.query.dishid != "string" ||
@@ -481,41 +482,41 @@ const resturantController = {
     const { dishid, type } = req.query;
 
     if (type === "similar") {
-      const apiData = await axios.get(
-        `https://api.pikky.io/ds/api/v1/server2/start-light/restaurant`,
-        {
-          params: {
-            dishid: dishid,
-          },
-        }
-      );
-
-      const dishData = apiData.data;
-
-      if (dishData.dishes.length === 0) {
-        return res.status(200).json({
-          status: true,
-          msg: "Restaurants not available",
-        });
-      }
-
-      const promiseResult = dishData.dishes.map(async (data) => {
-        const getDishData = await Recipes.findById({
-          _id: ObjectId(data.recipeId),
-        }).select({
-          "image.imageUrl": 1,
-          dishName: 1,
-        });
-        const returnObj = {
-          dishid: data.recipeId,
-          dishImg: getDishData.image.imageUrl,
-          dishName: getDishData.dishName,
-        };
-
-        return returnObj;
-      });
-
       try {
+        const apiData = await axios.get(
+          `https://api.pikky.io/ds/api/v1/server2/start-light/restaurant`,
+          {
+            params: {
+              dishid: dishid,
+            },
+          }
+        );
+
+        const dishData = apiData.data;
+
+        if (dishData.dishes.length === 0) {
+          return res.status(200).json({
+            status: true,
+            msg: "Restaurants not available",
+          });
+        }
+
+        const promiseResult = dishData.dishes.map(async (data) => {
+          const getDishData = await Recipes.findById({
+            _id: ObjectId(data.recipeId),
+          }).select({
+            "image.imageUrl": 1,
+            dishName: 1,
+          });
+          const returnObj = {
+            dishid: data.recipeId,
+            dishImg: getDishData.image.imageUrl,
+            dishName: getDishData.dishName,
+          };
+
+          return returnObj;
+        });
+
         const data = await Promise.all(promiseResult);
         return res.status(200).json({
           status: true,
@@ -614,6 +615,23 @@ const resturantController = {
           msg: "Something went wrong!!!",
         });
       }
+    }
+  },
+  getAllRestaurant: async (req, res) => {
+    try {
+      const data = await Restaurantdata.find().select({
+        restaurantName: 1,
+        image: 1,
+      });
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
+      });
     }
   },
 };
