@@ -1,7 +1,12 @@
 const fs = require("fs");
 const { ObjectId } = require("mongodb");
 const Restaurantdata = require("../../model/Restaurantdata");
-
+const axios = require("axios").default;
+const Recipes = require("../../model/recipes");
+const Recipesensory = require("../../model/Recipesensory");
+const ingredient = require("../../model/ingredients");
+const recipes = require("../../model/recipes");
+const async = require("async");
 const resturantController = {
   mockGetAllRecipes: async (req, res) => {
     try {
@@ -447,6 +452,104 @@ const resturantController = {
             data: dataObj.data,
           });
         }
+      }
+    } catch (error) {
+      return res.status(500).send({
+        message: "Some Thing went wrong",
+        err: error.message,
+      });
+    }
+  },
+
+  dishesSortByTags: async (req, res) => {
+    try {
+      let url = `https://api.pikky.io/ds/api/v1/server2/getTagDishes?id=${req.query.resid}&tags=${req.query.tag}`;
+      try {
+        let response = await axios.get(url);
+        console.log(response);
+        let Restaurantdata = response.data;
+        if (Restaurantdata.restaurantDishes.length > 0) {
+          Restaurantdata.restaurantDishes.map((item, index) => {
+            arrayId[index] = new ObjectId(item.restaurantDishId);
+            if (Restaurantdata.restaurantDishes.length == index + 1) {
+              // callback(null, arrayId);
+              if (arraySearch.length > 0) {
+                let resultUsersData = Restaurantdata.aggregate([
+                  {
+                    $unwind: "$restaurant_menu",
+                  },
+                  {
+                    $match: {
+                      "restaurant_menu._id": {
+                        $in: arraySearch,
+                      },
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      restaurantName: 1,
+                      restaurant_menu: 1,
+                    },
+                  },
+                ]);
+                let dataObj;
+                if (resultUsersData) {
+                  const returnObj = {
+                    restaurantId: resultUsersData[0]._id,
+                    restaurantName: resultUsersData[2].restaurantName,
+                  };
+
+                  let dishes = resultUsersData
+                    .filter(
+                      (data) =>
+                        req.query.resid.toString() === data._id.toString()
+                    )
+                    .map((d) => d.restaurant_menu);
+                  let removeDup = dishes.reduce((unique, o) => {
+                    if (
+                      !unique.some(
+                        (obj) =>
+                          obj.dish_name === o.dish_name && obj.price === o.price
+                      )
+                    ) {
+                      unique.push(o);
+                    }
+                    return unique;
+                  }, []);
+
+                  dataObj = {
+                    ...returnObj,
+                    dishes: removeDup,
+                  };
+                }
+                dataObj = {
+                  data: null,
+                };
+              } else {
+                dataObj = {
+                  data: null,
+                };
+              }
+              if (dataObj.data === null) {
+                res.status(200).json({
+                  status: true,
+                  data: null,
+                });
+              } else {
+                res.status(200).json({
+                  status: true,
+                  data: dataObj.data,
+                });
+              }
+            }
+          });
+        }
+      } catch (error) {
+        return res.status(500).send({
+          message: "Some Thing went wrong",
+          err: error.message,
+        });
       }
     } catch (error) {
       return res.status(500).send({
