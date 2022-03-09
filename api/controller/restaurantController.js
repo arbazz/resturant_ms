@@ -557,6 +557,7 @@ const resturantController = {
       });
     }
   },
+  
 };
 
 module.exports = resturantController;
