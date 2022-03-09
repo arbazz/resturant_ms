@@ -7,17 +7,17 @@ module.exports = function (app) {
   app.route("/getAllProduct").get(pringleController.getAllProduct),
     app.route("/getProduct").get(pringleController.getProduct),
     app.route("/mockGetAllRecipes").get(restaurantController.mockGetAllRecipes); //working 
-  app.route("/searchChildData").get(restaurantController.searchChildData),  //working
-    app.route("/searchData").get(restaurantController.searchData); //skip 
+  app.route("api/v1/restaurant/homepage/restaurant/search").get(restaurantController.searchChildData),  //working
+    app.route("api/v1/restaurant/homepage/search").get(restaurantController.searchData); //skip 
   app
-    .route("/starLightForRestaurants")  //working
+    .route("api/v1/restaurant/star-light")  //working
     .get(restaurantController.starLightForRestaurants);
-  app.route("/getAllRestaurant").get(restaurantController.getAllRestaurant); //working 
+  app.route("api/v1/restaurant/get/all").get(restaurantController.getAllRestaurant); //working 
   app
-    .route("/getMealNameAndMealCourse") // working 
+    .route("api/v1/restaurant/homepage/restaurant/mealname-subcourses") // working 
     .get(restaurantController.getMealNameAndMealCourse);
-  app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags);
-  app.route("/getRecipesIngredient").get(restaurantController.getRecipesIngredient);
-  app.route("/recipeAssociateRestaurant").get(restaurantController.recipeAssociateRestaurant);
-  app.route("/getRestaurantId").get(restaurantController.getRestaurantId);
+  app.route("api/v1/restaurant/homepage/restaurant/tag-dishes").get(restaurantController.dishesSortByTags);
+  app.route("api/v1/restaurant/homepage/recipes/").get(restaurantController.getRecipesIngredient); // working 
+  app.route("api/v1/restaurant/recipe-associate-restaurant").get(restaurantController.recipeAssociateRestaurant); //working 
+  app.route("api/v1/restaurant/get-restaurant").get(restaurantController.getRestaurantId); // not extact result showing this api
 };
