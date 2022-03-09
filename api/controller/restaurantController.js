@@ -359,7 +359,6 @@ const resturantController = {
                 },
               ],
             };
-            
           }
         } // else end
 
