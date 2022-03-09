@@ -16,4 +16,5 @@ module.exports = function (app) {
   app
     .route("/getMealNameAndMealCourse")
     .get(restaurantController.getMealNameAndMealCourse);
+  app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags);
 };
