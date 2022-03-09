@@ -17,4 +17,7 @@ module.exports = function (app) {
     .route("/getMealNameAndMealCourse")
     .get(restaurantController.getMealNameAndMealCourse);
   app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags);
+  app.route("/getRecipesIngredient").get(restaurantController.getRecipesIngredient);
+  app.route("/recipeAssociateRestaurant").get(restaurantController.recipeAssociateRestaurant);
+  app.route("/getRestaurantId").get(restaurantController.getRestaurantId);
 };

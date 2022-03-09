@@ -6,7 +6,7 @@ const Recipes = require("../../model/recipes");
 const Recipesensory = require("../../model/Recipesensory");
 const ingredient = require("../../model/ingredients");
 const recipes = require("../../model/recipes");
-const async = require("async");
+
 const resturantController = {
   mockGetAllRecipes: async (req, res) => {
     try {
@@ -359,7 +359,6 @@ const resturantController = {
                 },
               ],
             };
-            
           }
         } // else end
 
@@ -785,6 +784,192 @@ const resturantController = {
         status: false,
         msg: "Something Went Wrong!!!",
       });
+    }
+  },
+  getRecipesIngredient: async (req, res) => {
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      typeof req.query.dishid != "string" ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.dishid === ""
+    ) {
+      //return boolean
+      return res.status(404).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+    try {
+      let ingredientIdData = await Recipes.find(
+        {
+          _id: req.query.dishid,
+        },
+        {
+          ingredients: 1,
+          dishName: 1,
+          _id: 1,
+          "image.imageUrl": 1,
+        }
+      );
+      if (!ingredientIdData || !ingredientIdData[0].length) {
+        return res.status(500).json({
+          status: false,
+        });
+      }
+      let arrayIngredientId = [];
+      ingredientIdData[0].ingredients.map(async (item, index, array) => {
+        let y = await JSON.parse(JSON.stringify(item));
+        if (y.ingredientId != "" || y.ingredientId == undefined) {
+          ingredient
+            .findById(y.ingredientId, {
+              ingredient_name: 1,
+            })
+            .then((result) => {
+              if (result.ingredient_name.length > 0) {
+                y.name = result.ingredient_name[0].name;
+              } else {
+                y.name = "";
+              }
+              arrayIngredientId.push(y);
+              if (ingredientIdData[0].ingredients.length == index + 1) {
+                arrayIngredientId.push({
+                  dishImgUrl: ingredientIdData[0].image,
+                  dishName: ingredientIdData[0].dishName,
+                  dishId: ingredientIdData[0]._id,
+                });
+                return res.status(200).json({
+                  status: true,
+                  data: arrayIngredientId,
+                });
+              }
+            });
+        }
+      });
+      res.status(200).json({
+        status: true,
+        data: arrayIngredientId,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  imageUpload: async (req, res) => {
+    try {
+      const imageUrl = req.files.map((item) => {
+        return item.location;
+      });
+      res.json({
+        status: "true",
+        data: imageUrl,
+      });
+    } catch (error) {
+      res.json({
+        status: "false",
+        error: error,
+      });
+    }
+  },
+  recipeAssociateRestaurant: async (req, res) => {
+    try {
+      let data = await Restaurantdata.find(
+        {
+          restaurant_menu: {
+            $elemMatch: {
+              recipesAssociate: {
+                $in: [req.query.dishId],
+              },
+            },
+          },
+        },
+        {
+          _id: 1,
+          restaurantName: 1,
+          image: 1,
+          restaurant_logo: 1,
+          "restaurant_menu.price.$": 1,
+        }
+      );
+      return res.status(200).json({
+        status: true,
+        data: data,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        status: false,
+        msg: "Something went wrong!!!",
+        error: err,
+      });
+    }
+  },
+  getRestaurantId: async (req, res) => {
+    try {
+      if (req.query.id == undefined || req.query.id == "") {
+        return res.json({
+          status: "false",
+          error: "Invalid Search Id",
+        });
+      }
+      const data = await Restaurantdata.findById(ObjectId(req.query.id));
+      if (data === null) {
+        return res.json({
+          status: "false",
+          error: null,
+        });
+      }
+      if (data?.restaurant_menu.length > 0) {
+        let recipeData = [];
+        data.restaurant_menu.forEach((item) => {
+          recipeData = [...recipeData, ...item.recipesAssociate];
+        });
+        let searchObject = recipeData.map((item, index) => {
+          return ObjectId(item);
+        });
+        let resultRecipes = await recipes.find(
+          {
+            _id: {
+              $in: searchObject,
+            },
+          },
+          {
+            _id: 1,
+            dishName: 1,
+            image: 1,
+          }
+        );
+        data.restaurant_menu.map((itemMenu, indexMenu) => {
+          if (itemMenu.recipesAssociate.length > 0) {
+            let newItem = [];
+            let newObject = itemMenu.recipesAssociate.map((item, index) => {
+              let objectIndex = recipeData.findIndex((x) => x._id == item);
+              newItem.push(recipeData[objectIndex]);
+              if (itemMenu.recipesAssociate.length == index + 1) {
+                return newItem[0];
+              }
+            }); //Inner end
+            delete itemMenu.recipesAssociate;
+            itemMenu.recipesAssociate = newObject;
+          }
+          if (data.restaurant_menu.length == indexMenu + 1) {
+            return res.json({
+              status: "true",
+              data: resultRestaurant,
+            });
+          } else {
+            return res.json({
+              status: "false",
+              error: err,
+            });
+          }
+        });
+      } else {
+        return res.json({
+          status: "false",
+          error: null,
+        });
+      }
+    } catch (err) {
+      console.log(err);
     }
   },
 };
