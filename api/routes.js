@@ -6,15 +6,15 @@ const restaurantController = require("./controller/restaurantController");
 module.exports = function (app) {
   app.route("/getAllProduct").get(pringleController.getAllProduct),
     app.route("/getProduct").get(pringleController.getProduct),
-    app.route("/mockGetAllRecipes").get(restaurantController.mockGetAllRecipes);
-  app.route("/searchChildData").get(restaurantController.searchChildData),
-    app.route("/searchData").get(restaurantController.searchData);
+    app.route("/mockGetAllRecipes").get(restaurantController.mockGetAllRecipes); //working 
+  app.route("/searchChildData").get(restaurantController.searchChildData),  //working
+    app.route("/searchData").get(restaurantController.searchData); //skip 
   app
-    .route("/starLightForRestaurants")
+    .route("/starLightForRestaurants")  //working
     .get(restaurantController.starLightForRestaurants);
-  app.route("/getAllRestaurant").get(restaurantController.getAllRestaurant);
+  app.route("/getAllRestaurant").get(restaurantController.getAllRestaurant); //working 
   app
-    .route("/getMealNameAndMealCourse")
+    .route("/getMealNameAndMealCourse") // working 
     .get(restaurantController.getMealNameAndMealCourse);
-  app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags);
+  app.route("/dishesSortByTags").get(restaurantController.dishesSortByTags); //skip
 };
