@@ -558,7 +558,6 @@ const resturantController = {
                 },
               ],
             };
-            
           }
         } // else end
 
