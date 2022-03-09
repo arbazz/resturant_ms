@@ -1,7 +1,12 @@
 const fs = require("fs");
 const { ObjectId } = require("mongodb");
 const Restaurantdata = require("../../model/Restaurantdata");
-
+const axios = require("axios").default;
+const Recipes = require("../../model/recipes");
+const Recipesensory = require("../../model/Recipesensory");
+const ingredient = require("../../model/ingredients");
+const recipes = require("../../model/recipes");
+const async = require("async");
 const resturantController = {
   mockGetAllRecipes: async (req, res) => {
     try {
@@ -240,43 +245,40 @@ const resturantController = {
           },
         ]);
         let dataObj;
-        if (resultUsersData) {
-          if (resultUsersData.length > 0) {
-            const returnObj = {
-              restaurantId: resultUsersData[0]._id,
-              restaurantImg: resultUsersData[0].image,
-              restaurantName: resultUsersData[0].restaurantName,
-              //restaurantCuisine: resultUsersData[0].cuisineServed,
-              restaurantPricing: resultUsersData[0].pricing_details,
-              restaurantAddress: resultUsersData[0].contact_details,
-              //restaurantTags: resultUsersData[0].restaurantTags,
-            };
+        if (resultUsersData.length > 0) {
+          const returnObj = {
+            restaurantId: resultUsersData[0]._id,
+            restaurantImg: resultUsersData[0].image,
+            restaurantName: resultUsersData[0].restaurantName,
+            //restaurantCuisine: resultUsersData[0].cuisineServed,
+            restaurantPricing: resultUsersData[0].pricing_details,
+            restaurantAddress: resultUsersData[0].contact_details,
+            //restaurantTags: resultUsersData[0].restaurantTags,
+          };
 
-            let dishes = resultUsersData
-              .filter(
-                (data) => req.query.resid.toString() === data._id.toString()
+          let dishes = resultUsersData
+            .filter(
+              (data) => req.query.resid.toString() === data._id.toString()
+            )
+            .map((d) => d.restaurant_menu);
+          let removeDup = dishes.reduce((unique, o) => {
+            if (
+              !unique.some(
+                (obj) => obj.dish_name === o.dish_name && obj.price === o.price
               )
-              .map((d) => d.restaurant_menu);
-            let removeDup = dishes.reduce((unique, o) => {
-              if (
-                !unique.some(
-                  (obj) =>
-                    obj.dish_name === o.dish_name && obj.price === o.price
-                )
-              ) {
-                unique.push(o);
-              }
-              return unique;
-            }, []);
-            dataObj = {
-              ...returnObj,
-              dishes: removeDup,
-            };
-          } else {
-            dataObj = {
-              data: null,
-            };
-          }
+            ) {
+              unique.push(o);
+            }
+            return unique;
+          }, []);
+          dataObj = {
+            ...returnObj,
+            dishes: removeDup,
+          };
+        } else {
+          dataObj = {
+            data: null,
+          };
         }
 <<<<<<< HEAD
       }
@@ -450,7 +452,7 @@ const resturantController = {
   };
 =======
 
-        if (data.data === null) {
+        if (dataObj.data === null) {
           res.status(200).json({
             status: true,
             data: null,
@@ -458,7 +460,7 @@ const resturantController = {
         } else {
           res.status(200).json({
             status: true,
-            data,
+            dat: dataObj.data,
           });
         }
       } else if (req.query.type === "sensory") {
@@ -556,6 +558,7 @@ const resturantController = {
                 },
               ],
             };
+            
           }
         } // else end
 
@@ -603,46 +606,42 @@ const resturantController = {
           },
         ]);
         let dataObj;
-        if (resultUsersData) {
-          if (resultUsersData.length > 0) {
-            const returnObj = {
-              restaurantId: resultUsersData[0]._id,
-              restaurantImg: resultUsersData[0].image,
-              restaurantName: resultUsersData[0].restaurantName,
-              //restaurantCuisine: resultUsersData[0].cuisineServed,
-              restaurantPricing: resultUsersData[0].pricing_details,
-              restaurantAddress: resultUsersData[0].contact_details,
-              //restaurantTags: resultUsersData[0].restaurantTags,
-            };
+        if (resultUsersData.length > 0) {
+          const returnObj = {
+            restaurantId: resultUsersData[0]._id,
+            restaurantImg: resultUsersData[0].image,
+            restaurantName: resultUsersData[0].restaurantName,
+            //restaurantCuisine: resultUsersData[0].cuisineServed,
+            restaurantPricing: resultUsersData[0].pricing_details,
+            restaurantAddress: resultUsersData[0].contact_details,
+            //restaurantTags: resultUsersData[0].restaurantTags,
+          };
 
-            let dishes = resultUsersData
-              .filter(
-                (data) => req.query.resid.toString() === data._id.toString()
+          let dishes = resultUsersData
+            .filter(
+              (data) => req.query.resid.toString() === data._id.toString()
+            )
+            .map((d) => d.restaurant_menu);
+          let removeDup = dishes.reduce((unique, o) => {
+            if (
+              !unique.some(
+                (obj) => obj.dish_name === o.dish_name && obj.price === o.price
               )
-              .map((d) => d.restaurant_menu);
-            let removeDup = dishes.reduce((unique, o) => {
-              if (
-                !unique.some(
-                  (obj) =>
-                    obj.dish_name === o.dish_name && obj.price === o.price
-                )
-              ) {
-                unique.push(o);
-              }
-              return unique;
-            }, []);
-            dataObj = {
-              ...returnObj,
-              dishes: removeDup,
-            };
-          } else {
-            dataObj = {
-              data: null,
-            };
-          }
+            ) {
+              unique.push(o);
+            }
+            return unique;
+          }, []);
+          dataObj = {
+            ...returnObj,
+            dishes: removeDup,
+          };
+        } else {
+          dataObj = {
+            data: null,
+          };
         }
-
-        if (dataObj === null) {
+        if (dataObj.data === null) {
           res.status(200).json({
             status: true,
             data: null,
@@ -650,7 +649,7 @@ const resturantController = {
         } else {
           res.status(200).json({
             status: true,
-            data : dataObj,
+            data: dataObj.data,
           });
         }
       }
@@ -658,6 +657,332 @@ const resturantController = {
       return res.status(500).send({
         message: "Some Thing went wrong",
         err: error.message,
+      });
+    }
+  },
+
+  dishesSortByTags: async (req, res) => {
+    try {
+      let url = `https://api.pikky.io/ds/api/v1/server2/getTagDishes?id=${req.query.resid}&tags=${req.query.tag}`;
+      try {
+        let response = await axios.get(url);
+        console.log(response);
+        let Restaurantdata = response.data;
+        if (Restaurantdata.restaurantDishes.length > 0) {
+          Restaurantdata.restaurantDishes.map((item, index) => {
+            arrayId[index] = new ObjectId(item.restaurantDishId);
+            if (Restaurantdata.restaurantDishes.length == index + 1) {
+              // callback(null, arrayId);
+              if (arraySearch.length > 0) {
+                let resultUsersData = Restaurantdata.aggregate([
+                  {
+                    $unwind: "$restaurant_menu",
+                  },
+                  {
+                    $match: {
+                      "restaurant_menu._id": {
+                        $in: arraySearch,
+                      },
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      restaurantName: 1,
+                      restaurant_menu: 1,
+                    },
+                  },
+                ]);
+                let dataObj;
+                if (resultUsersData) {
+                  const returnObj = {
+                    restaurantId: resultUsersData[0]._id,
+                    restaurantName: resultUsersData[2].restaurantName,
+                  };
+
+                  let dishes = resultUsersData
+                    .filter(
+                      (data) =>
+                        req.query.resid.toString() === data._id.toString()
+                    )
+                    .map((d) => d.restaurant_menu);
+                  let removeDup = dishes.reduce((unique, o) => {
+                    if (
+                      !unique.some(
+                        (obj) =>
+                          obj.dish_name === o.dish_name && obj.price === o.price
+                      )
+                    ) {
+                      unique.push(o);
+                    }
+                    return unique;
+                  }, []);
+
+                  dataObj = {
+                    ...returnObj,
+                    dishes: removeDup,
+                  };
+                }
+                dataObj = {
+                  data: null,
+                };
+              } else {
+                dataObj = {
+                  data: null,
+                };
+              }
+              if (dataObj.data === null) {
+                res.status(200).json({
+                  status: true,
+                  data: null,
+                });
+              } else {
+                res.status(200).json({
+                  status: true,
+                  data: dataObj.data,
+                });
+              }
+            }
+          });
+        }
+      } catch (error) {
+        return res.status(500).send({
+          message: "Some Thing went wrong",
+          err: error.message,
+        });
+      }
+    } catch (error) {
+      return res.status(500).send({
+        message: "Some Thing went wrong",
+        err: error.message,
+      });
+    }
+  },
+  starLightForRestaurants: async (req, res) => {
+    // if true then req.query is empty
+
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      typeof req.query.dishid != "string" ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.type === "" ||
+      req.query.dishid === ""
+    ) {
+      //return boolean
+      return res.status(400).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+
+    const { dishid, type } = req.query;
+
+    if (type === "similar") {
+      try {
+        const apiData = await axios.get(
+          `https://api.pikky.io/ds/api/v1/server2/start-light/restaurant`,
+          {
+            params: {
+              dishid: dishid,
+            },
+          }
+        );
+
+        const dishData = apiData.data;
+
+        if (dishData.dishes.length === 0) {
+          return res.status(200).json({
+            status: true,
+            msg: "Restaurants not available",
+          });
+        }
+
+        const promiseResult = dishData.dishes.map(async (data) => {
+          const getDishData = await Recipes.findById({
+            _id: ObjectId(data.recipeId),
+          }).select({
+            "image.imageUrl": 1,
+            dishName: 1,
+          });
+          const returnObj = {
+            dishid: data.recipeId,
+            dishImg: getDishData.image.imageUrl,
+            dishName: getDishData.dishName,
+          };
+
+          return returnObj;
+        });
+
+        const data = await Promise.all(promiseResult);
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "sensory") {
+      try {
+        const data = await Recipesensory.find(
+          {
+            recipeId: dishid,
+          },
+          {
+            sensoryProfile: 1,
+          }
+        );
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "nutritional") {
+      try {
+        const data = await Recipesensory.find(
+          {
+            recipeId: dishid,
+          },
+          {
+            nutritionalValue: 1,
+            calories: 1,
+          }
+        );
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "restaurant") {
+      const restData = await Restaurantdata.aggregate([
+        {
+          $unwind: "$dishes",
+        },
+        {
+          $match: {
+            "dishes.recipeId": ObjectId(dishid),
+          },
+        },
+        {
+          $project: {
+            "image.imageUrl": 1,
+            _id: 1,
+            restaurantName: 1,
+            "dishes._id": 1,
+            "dishes.recipeId": 1,
+            "dishes.resDishName": 1,
+            "dishes.dishPrice": 1,
+          },
+        },
+      ]);
+      let promiseResult = restData.map((d) => {
+        const returnObj = {
+          dishid: d.recipeId,
+          restaurantId: d._id,
+          restaurantImg: d.image,
+          dishName: d.dishes.resDishName,
+          dishPrice: d.dishes.dishPrice,
+          restaurantName: d.restaurantName,
+        };
+        return returnObj;
+      });
+
+      try {
+        const data = await Promise.all(promiseResult);
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    }
+  },
+  getAllRestaurant: async (req, res) => {
+    try {
+      const data = await Restaurantdata.find().select({
+        restaurantName: 1,
+        image: 1,
+      });
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
+      });
+    }
+  },
+  getMealNameAndMealCourse: async (req, res) => {
+    try {
+      const { resid } = req.query;
+      const result = await Restaurantdata.findById(
+        {
+          _id: ObjectId(resid),
+        },
+        {
+          "dishes.mealName": 1,
+          "dishes.subCourse": 1,
+        }
+      );
+      function removeDuplicatesBy(keyFn, array) {
+        let mySet = new Set();
+        return array.filter(function (x) {
+          let key = keyFn(x),
+            isNew = !mySet.has(key);
+          if (isNew) mySet.add(key);
+          return isNew;
+        });
+      }
+
+      let data = result.dishes.reduce((unique, o) => {
+        if (
+          !unique.some(
+            (obj) =>
+              obj.mealName === o.mealName && obj.subCourse === o.subCourse
+          )
+        ) {
+          unique.push(o);
+        }
+        return unique;
+      }, []);
+
+      // let mealName = [];
+      // let subCourse = [];
+
+      // removeDuplicatesBy((x) => x.mealName, removeDup).map((d) => {
+      // 	mealName.push(d.mealName);
+      // });
+
+      // removeDuplicatesBy((x) => x.subCourse, removeDup).map((d) => {
+      // 	subCourse.push(d.subCourse);
+      // });
+      // let data = { mealName: mealName, subCourse: subCourse };
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
       });
     }
   },
