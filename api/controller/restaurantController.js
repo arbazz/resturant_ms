@@ -452,7 +452,7 @@ const resturantController = {
         } else {
           res.status(200).json({
             status: true,
-            data : dataObj,
+            data: dataObj,
           });
         }
       }
@@ -460,6 +460,234 @@ const resturantController = {
       return res.status(500).send({
         message: "Some Thing went wrong",
         err: error.message,
+      });
+    }
+  },
+  starLightForRestaurants: async (req, res) => {
+    // if true then req.query is empty
+
+    if (
+      Object.values(req.query).every((page) => page === "") ||
+      typeof req.query.dishid != "string" ||
+      (Object.keys(req.query).length === 0) === true ||
+      req.query.type === "" ||
+      req.query.dishid === ""
+    ) {
+      //return boolean
+      return res.status(400).json({
+        status: false,
+        msg: "Bad Input",
+      });
+    }
+
+    const { dishid, type } = req.query;
+
+    if (type === "similar") {
+      try {
+        const apiData = await axios.get(
+          `https://api.pikky.io/ds/api/v1/server2/start-light/restaurant`,
+          {
+            params: {
+              dishid: dishid,
+            },
+          }
+        );
+
+        const dishData = apiData.data;
+
+        if (dishData.dishes.length === 0) {
+          return res.status(200).json({
+            status: true,
+            msg: "Restaurants not available",
+          });
+        }
+
+        const promiseResult = dishData.dishes.map(async (data) => {
+          const getDishData = await Recipes.findById({
+            _id: ObjectId(data.recipeId),
+          }).select({
+            "image.imageUrl": 1,
+            dishName: 1,
+          });
+          const returnObj = {
+            dishid: data.recipeId,
+            dishImg: getDishData.image.imageUrl,
+            dishName: getDishData.dishName,
+          };
+
+          return returnObj;
+        });
+
+        const data = await Promise.all(promiseResult);
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "sensory") {
+      try {
+        const data = await Recipesensory.find(
+          {
+            recipeId: dishid,
+          },
+          {
+            sensoryProfile: 1,
+          }
+        );
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "nutritional") {
+      try {
+        const data = await Recipesensory.find(
+          {
+            recipeId: dishid,
+          },
+          {
+            nutritionalValue: 1,
+            calories: 1,
+          }
+        );
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    } else if (type === "restaurant") {
+      const restData = await Restaurantdata.aggregate([
+        {
+          $unwind: "$dishes",
+        },
+        {
+          $match: {
+            "dishes.recipeId": ObjectId(dishid),
+          },
+        },
+        {
+          $project: {
+            "image.imageUrl": 1,
+            _id: 1,
+            restaurantName: 1,
+            "dishes._id": 1,
+            "dishes.recipeId": 1,
+            "dishes.resDishName": 1,
+            "dishes.dishPrice": 1,
+          },
+        },
+      ]);
+      let promiseResult = restData.map((d) => {
+        const returnObj = {
+          dishid: d.recipeId,
+          restaurantId: d._id,
+          restaurantImg: d.image,
+          dishName: d.dishes.resDishName,
+          dishPrice: d.dishes.dishPrice,
+          restaurantName: d.restaurantName,
+        };
+        return returnObj;
+      });
+
+      try {
+        const data = await Promise.all(promiseResult);
+        return res.status(200).json({
+          status: true,
+          data,
+        });
+      } catch (err) {
+        return res.status(500).json({
+          status: false,
+          msg: "Something went wrong!!!",
+        });
+      }
+    }
+  },
+  getAllRestaurant: async (req, res) => {
+    try {
+      const data = await Restaurantdata.find().select({
+        restaurantName: 1,
+        image: 1,
+      });
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
+      });
+    }
+  },
+  getMealNameAndMealCourse: async (req, res) => {
+    try {
+      const { resid } = req.query;
+      const result = await Restaurantdata.findById(
+        {
+          _id: ObjectId(resid),
+        },
+        {
+          "dishes.mealName": 1,
+          "dishes.subCourse": 1,
+        }
+      );
+      function removeDuplicatesBy(keyFn, array) {
+        let mySet = new Set();
+        return array.filter(function (x) {
+          let key = keyFn(x),
+            isNew = !mySet.has(key);
+          if (isNew) mySet.add(key);
+          return isNew;
+        });
+      }
+
+      let data = result.dishes.reduce((unique, o) => {
+        if (
+          !unique.some(
+            (obj) =>
+              obj.mealName === o.mealName && obj.subCourse === o.subCourse
+          )
+        ) {
+          unique.push(o);
+        }
+        return unique;
+      }, []);
+
+      // let mealName = [];
+      // let subCourse = [];
+
+      // removeDuplicatesBy((x) => x.mealName, removeDup).map((d) => {
+      // 	mealName.push(d.mealName);
+      // });
+
+      // removeDuplicatesBy((x) => x.subCourse, removeDup).map((d) => {
+      // 	subCourse.push(d.subCourse);
+      // });
+      // let data = { mealName: mealName, subCourse: subCourse };
+      return res.status(200).json({
+        status: true,
+        data,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        msg: "Something Went Wrong!!!",
       });
     }
   },
