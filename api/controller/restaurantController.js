@@ -466,7 +466,6 @@ const resturantController = {
       let url = `https://api.pikky.io/ds/api/v1/server2/getTagDishes?id=${req.query.resid}&tags=${req.query.tag}`;
       try {
         let response = await axios.get(url);
-        console.log(response);
         let Restaurantdata = response.data;
         if (Restaurantdata.restaurantDishes.length > 0) {
           Restaurantdata.restaurantDishes.map((item, index) => {
