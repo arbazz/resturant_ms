@@ -106,7 +106,9 @@ const resturantController = {
           _id: 1,
         };
       }
-      let response = await Recipes.find({ query1, query2 });
+      let resP = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/search-data-recipes-proxy",{query1, query2})
+      // let response = await Recipes.find({ query1, query2 });
+      let response = resP.data
       return res.status(200).json({
         status: true,
         response,
@@ -598,12 +600,17 @@ const resturantController = {
         }
 
         const promiseResult = dishData.dishes.map(async (data) => {
-          const getDishData = await Recipes.findById({
-            _id: ObjectId(data.recipeId),
-          }).select({
-            "image.imageUrl": 1,
-            dishName: 1,
-          });
+          let recipeId = data.recipeId;
+          let response = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/star-light-recipes-proxy",{recipeId});
+          let getDishData = response.data;
+          
+          // const getDishData = await Recipes.findById({
+          //   _id: ObjectId(data.recipeId),
+          // }).select({
+          //   "image.imageUrl": 1,
+          //   dishName: 1,
+          // });
+
           const returnObj = {
             dishid: data.recipeId,
             dishImg: getDishData.image.imageUrl,
@@ -800,17 +807,20 @@ const resturantController = {
       });
     }
     try {
-      let ingredientIdData = await Recipes.find(
-        {
-          _id: req.query.dishid,
-        },
-        {
-          ingredients: 1,
-          dishName: 1,
-          _id: 1,
-          "image.imageUrl": 1,
-        }
-      );
+      let dishid = req.query.dishid
+      let response = await axios.post('http://localhost:8000/api/v1/restaurant/recipes/recipes-ingredient-proxy',{dishid});
+      let ingredientIdData = response.data
+      // let ingredientIdData = await Recipes.find(
+      //   {
+      //     _id: req.query.dishid,
+      //   },
+      //   {
+      //     ingredients: 1,
+      //     dishName: 1,
+      //     _id: 1,
+      //     "image.imageUrl": 1,
+      //   }
+      // );
       if (!ingredientIdData || !ingredientIdData[0].length) {
         return res.status(500).json({
           status: false,
@@ -925,18 +935,20 @@ const resturantController = {
         let searchObject = recipeData.map((item, index) => {
           return ObjectId(item);
         });
-        let resultRecipes = await recipes.find(
-          {
-            _id: {
-              $in: searchObject,
-            },
-          },
-          {
-            _id: 1,
-            dishName: 1,
-            image: 1,
-          }
-        );
+        
+        let response = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/restaurant-id-recipes-proxy",{searchObject})
+        // let resultRecipes = await recipes.find(
+        //   {
+        //     _id: {
+        //       $in: searchObject,
+        //     },
+        //   },
+        //   {
+        //     _id: 1,
+        //     dishName: 1,
+        //     image: 1,
+        //   }
+        // );
         data.restaurant_menu.map((itemMenu, indexMenu) => {
           if (itemMenu.recipesAssociate.length > 0) {
             let newItem = [];
