@@ -107,12 +107,25 @@ const resturantController = {
         };
       }
       let resP = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/search-data-recipes-proxy",{query1, query2})
-      // let response = await Recipes.find({ query1, query2 });
       let response = resP.data
-      return res.status(200).json({
-        status: true,
-        response,
-      });
+      if(!err){
+        return res.status(200).json({
+          status: true,
+          response,
+        });
+      }
+      else{
+        return res.status(500).json({
+          status: false,
+          msg: "Something Went Wrong!!!",
+        });
+      }
+
+      // let response = await Recipes.find({ query1, query2 });
+      // return res.status(200).json({
+      //   status: true,
+      //   response,
+      // });
     } catch (error) {
       return res.status(500).json({
         status: false,
@@ -462,7 +475,6 @@ const resturantController = {
       });
     }
   },
-
   dishesSortByTags: async (req, res) => {
     try {
       let url = `https://api.pikky.io/ds/api/v1/server2/getTagDishes?id=${req.query.resid}&tags=${req.query.tag}`;
@@ -603,7 +615,22 @@ const resturantController = {
           let recipeId = data.recipeId;
           let response = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/star-light-recipes-proxy",{recipeId});
           let getDishData = response.data;
-          
+
+          if(!getDishData){
+            const returnObj = {
+              dishid: data.recipeId,
+              dishImg: getDishData.image.imageUrl,
+              dishName: getDishData.dishName,
+            };
+            return returnObj;
+          }
+          else{
+            return res.status(500).json({
+              status: false,
+              msg: "Something went wrong!!!",
+            });
+          }
+
           // const getDishData = await Recipes.findById({
           //   _id: ObjectId(data.recipeId),
           // }).select({
@@ -935,8 +962,10 @@ const resturantController = {
         let searchObject = recipeData.map((item, index) => {
           return ObjectId(item);
         });
-        
-        let response = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/restaurant-id-recipes-proxy",{searchObject})
+
+        let response = await axios.post("http://localhost:8000/api/v1/restaurant/recipes/restaurant-id-recipes-proxy",{searchObject});
+        let resultRecipes = response.data;
+
         // let resultRecipes = await recipes.find(
         //   {
         //     _id: {
@@ -949,6 +978,7 @@ const resturantController = {
         //     image: 1,
         //   }
         // );
+
         data.restaurant_menu.map((itemMenu, indexMenu) => {
           if (itemMenu.recipesAssociate.length > 0) {
             let newItem = [];
